@@ -650,7 +650,7 @@ namespace UndertaleModLib.Compiler
             if (data?.GeneralInfo?.Major < 2)
                 Functions["instance_create"] = new FunctionInfo(this, 3);
             Functions["instance_create_depth"] = new FunctionInfo(this, 4);
-            Functions["instance_create_layer"] = new FunctionInfo(this, 4);
+            Functions["instance_create_layer"] = new FunctionInfo(this, -5);
             Functions["instance_copy"] = new FunctionInfo(this, 1);
             Functions["instance_change"] = new FunctionInfo(this, 2);
             Functions["instance_destroy"] = new FunctionInfo(this, -1);
