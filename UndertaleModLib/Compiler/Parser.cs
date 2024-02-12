@@ -1055,8 +1055,17 @@ namespace UndertaleModLib.Compiler
                 return null;
             }
 
-            private static void ParseFunctionCallArgs(CompileContext context, Statement result, Statement s)
+            private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
             {
+                Statement s = EnsureTokenKind(TokenKind.ProcFunction);
+
+                // gml_pragma processing can be done here, however we don't need to do that yet really
+
+                EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
+
+                Statement result = new Statement(expression ? Statement.StatementKind.ExprFunctionCall :
+                                                 Statement.StatementKind.FunctionCall, s.Token);
+
                 // Parse the parameters/arguments
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
                 {
@@ -1072,20 +1081,6 @@ namespace UndertaleModLib.Compiler
                         }
                     }
                 }
-            }
-
-            private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
-            {
-                Statement s = EnsureTokenKind(TokenKind.ProcFunction);
-
-                // gml_pragma processing can be done here, however we don't need to do that yet really
-
-                EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
-
-                Statement result = new Statement(expression ? Statement.StatementKind.ExprFunctionCall :
-                                                 Statement.StatementKind.FunctionCall, s.Token);
-
-                ParseFunctionCallArgs(context, result, s);
 
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
@@ -1443,23 +1438,6 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseSingleVar(CompileContext context)
             {
-                if (IsNextToken(TokenKind.ProcFunction))
-                {
-                    Statement procFunc = EnsureTokenKind(TokenKind.ProcFunction);
-                    EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
-                    Statement funcCall = new Statement(Statement.StatementKind.ExprFunctionCall, procFunc.Token);
-                    
-                    Statement newStatement = new Statement();
-                    newStatement.Text = "";
-                    funcCall.Children.Add(newStatement);
-
-                    ParseFunctionCallArgs(context, funcCall, procFunc);
-
-                    if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
-
-                    return funcCall;
-                }
-
                 Statement s = EnsureTokenKind(TokenKind.ProcVariable);
                 if (s == null)
                     return null;
