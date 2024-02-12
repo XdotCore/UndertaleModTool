@@ -20,14 +20,14 @@ public static partial class Decompiler
         {
             if (Value != null)
             {
-                if (AssetTypeResolver.return_types.ContainsKey(context.TargetCode.Name.Content))
-                    Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetCode.Name.Content]);
+                if (AssetTypeResolver.return_types.TryGetValue(context.TargetCode.Name.Content, out var type))
+                        Value.DoTypePropagation(context, type);
                 if (context.GlobalContext.Data != null && !DecompileContext.GMS2_3)
                 {
                     // We might be decompiling a legacy script - resolve it's name
                     UndertaleScript script = context.GlobalContext.Data.Scripts.FirstOrDefault(x => x.Code == context.TargetCode);
-                    if (script != null && AssetTypeResolver.return_types.ContainsKey(script.Name.Content))
-                        Value.DoTypePropagation(context, AssetTypeResolver.return_types[script.Name.Content]);
+                    if (script != null && AssetTypeResolver.return_types.TryGetValue(script.Name.Content, out type))
+                            Value.DoTypePropagation(context, type);
                 }
 
                 string cleanVal = Value.ToString(context);

@@ -66,7 +66,8 @@ public static partial class Decompiler
         public override string ToString(DecompileContext context)
         {
             StringBuilder sb = new StringBuilder();
-            if (context.Statements.ContainsKey(FunctionBodyEntryBlock.Address.Value))
+            
+            if (context.Statements.TryGetValue(FunctionBodyEntryBlock.Address.Value, out var statements))
             {
                 FunctionDefinition def;
                 var oldDecompilingStruct = context.DecompilingStruct;
@@ -80,7 +81,7 @@ public static partial class Decompiler
                     sb.Append("function");
                     if (IsStatement)
                     {
-                        sb.Append(" ");
+                        sb.Append(' ');
 
                         // For further optimization, we could *probably* create a dictionary that's just flipped KVPs (assuming there are no dup. values).
                         // Doing so would save the need for LINQ and what-not. Not that big of an issue, but still an option.
@@ -107,7 +108,7 @@ public static partial class Decompiler
                                 sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
                         }
                     }
-                    sb.Append("(");
+                    sb.Append('(');
                     for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
                     {
                         if (i != 0)
@@ -122,12 +123,11 @@ public static partial class Decompiler
                     sb.Append(Function.Name.Content);
                 }
 
-                var statements = context.Statements[FunctionBodyEntryBlock.Address.Value];
                 int numNotReturn = statements.FindAll(stmt => !(stmt is ReturnStatement)).Count;
 
                 if (numNotReturn > 0 || Subtype != FunctionType.Struct)
                 {
-                    sb.Append("\n");
+                    sb.Append('\n');
                     sb.Append(context.Indentation);
                     sb.Append("{\n");
                     context.IndentationLevel++;
@@ -155,24 +155,24 @@ public static partial class Decompiler
                         if (def?.Function == Function)
                         {
                             //sb.Append("// Error decompiling function: function contains its own declaration???\n");
-                            sb.Append("\n");
+                            sb.Append('\n');
                             break;
                         }
                         else
                         {
                             sb.Append(stmt.ToString(context));
                             if (Subtype == FunctionType.Struct && count < numNotReturn)
-                                sb.Append(",");
+                                sb.Append('\n');
                         }
-                        sb.Append("\n");
+                        sb.Append('\n');
                     }
                     context.DecompilingStruct = oldDecompilingStruct;
                     context.ArgumentReplacements = oldReplacements;
                     context.IndentationLevel--;
                     sb.Append(context.Indentation);
-                    sb.Append("}");
+                    sb.Append('}');
                     if(!oldDecompilingStruct)
-                        sb.Append("\n");
+                        sb.Append('\n');
                 }
                 else
                     sb.Append("{}");
@@ -181,6 +181,7 @@ public static partial class Decompiler
             {
                 sb.Append(Function.Name.Content);
             }
+
             return sb.ToString();
         }
 

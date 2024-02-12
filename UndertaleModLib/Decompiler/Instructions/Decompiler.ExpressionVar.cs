@@ -146,8 +146,10 @@ public static partial class Decompiler
                 foreach (Expression e in ArrayIndices)
                     e?.DoTypePropagation(context, AssetIDType.Other);
             }
-
-            AssetIDType current = context.assetTypes.ContainsKey(Var) ? context.assetTypes[Var] : AssetIDType.Other;
+            
+            AssetIDType current;
+            if (!context.assetTypes.TryGetValue(Var, out current))
+                current = AssetIDType.Other;
             if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
                 current = suggestedType;
             AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(context, Var.Name.Content);

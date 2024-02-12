@@ -150,11 +150,13 @@ public static partial class Decompiler
                         Decompiler.DecompileFromBlock(childContext, blocks, blocks[0]);
                         Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                     }
-                    context.GlobalContext.ScriptArgsCache[funcName] = new AssetIDType[15];
+
+                    var typesArr = new AssetIDType[15];
+                    context.GlobalContext.ScriptArgsCache[funcName] = typesArr;
                     for (int i = 0; i < 15; i++)
                     {
                         var v = childContext.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                        context.GlobalContext.ScriptArgsCache[funcName][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                        typesArr[i] = v.Any() ? v.First().Value : AssetIDType.Other;
                     }
                 }
                 catch (Exception e)

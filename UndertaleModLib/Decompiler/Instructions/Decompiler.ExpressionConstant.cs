@@ -154,7 +154,7 @@ public static partial class Decompiler
                 case AssetIDType.ContextDependent:
                 {
                     var func = context.currentFunction;
-                    if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
+                    if (func != null && (ContextualAssetResolver.resolvers?.TryGetValue(func.Function.Name.Content, out var resolveFunc) ?? false))
                     {
                         List<Expression> actualArguments = new List<Expression>();
                         foreach (var arg in func.Arguments)
@@ -164,7 +164,7 @@ public static partial class Decompiler
                             else
                                 actualArguments.Add(arg);
                         }
-                        string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
+                        string result = resolveFunc(context, func, actualArguments.IndexOf(this), this);
                         if (result != null)
                             return result;
                     }
@@ -180,8 +180,8 @@ public static partial class Decompiler
                         else // guaranteed to be an unsigned int.
                         {
                             uint vuint = (uint)vint;
-                            if (Decompiler.ColorDictionary.ContainsKey(vuint))
-                                return Decompiler.ColorDictionary[vuint];
+                            if (Decompiler.ColorDictionary.TryGetValue(vuint, out var colorName))
+                                return colorName;
                             else
                                 return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
                         }
