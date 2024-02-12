@@ -792,16 +792,16 @@ namespace UndertaleModLib.Decompiler
 
             foreach (var instr in code.Instructions)
             {
-                if (blockByAddress.ContainsKey(instr.Address))
+                if (blockByAddress.TryGetValue(instr.Address, out var block))
                 {
                     if (currentBlock != null)
                     {
                         currentBlock.conditionalExit = false;
-                        currentBlock.nextBlockTrue = blockByAddress[instr.Address];
-                        currentBlock.nextBlockFalse = blockByAddress[instr.Address];
-                        blockByAddress[instr.Address].entryPoints.Add(currentBlock);
+                        currentBlock.nextBlockTrue = block;
+                        currentBlock.nextBlockFalse = block;
+                        block.entryPoints.Add(currentBlock);
                     }
-                    currentBlock = blockByAddress[instr.Address];
+                    currentBlock = block;
                 }
 
                 if (currentBlock == null)
@@ -1158,9 +1158,10 @@ namespace UndertaleModLib.Decompiler
                             caseExpr = cmp.Argument2;
                         }
 
-                        if (!caseEntries.ContainsKey(block.nextBlockTrue))
-                            caseEntries.Add(block.nextBlockTrue, new List<Expression>());
-                        caseEntries[block.nextBlockTrue].Add(caseExpr);
+                        List<Expression> list;
+                        if (!caseEntries.TryGetValue(block.nextBlockTrue, out list))
+                            caseEntries.Add(block.nextBlockTrue, list = new());
+                        list.Add(caseExpr);
 
                         if (!block.conditionalExit)
                         {
@@ -1214,9 +1215,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             // This is the default-case meet-point if it is b.
                             uint instructionId = ((uint)block.Address + 1 + (uint)breakInstruction.JumpOffset);
-                            if (!blocks.ContainsKey(instructionId))
+                            if (!blocks.TryGetValue(instructionId, out var switchEnd))
                                 Debug.Fail("Switch statement default: Bad target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
-                            Block switchEnd = blocks[instructionId];
 
                             Block start = meetPoint;
                             defaultCase.Block = HLDecompileBlocks(context, ref start, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1);
