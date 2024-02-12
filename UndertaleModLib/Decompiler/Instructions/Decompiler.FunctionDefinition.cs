@@ -162,7 +162,7 @@ public static partial class Decompiler
                         {
                             sb.Append(stmt.ToString(context));
                             if (Subtype == FunctionType.Struct && count < numNotReturn)
-                                sb.Append('\n');
+                                sb.Append(',');
                         }
                         sb.Append('\n');
                     }
